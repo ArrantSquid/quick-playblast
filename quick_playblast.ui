@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>John P. Neumann</author>
+ <class>quickPlayblastWindow</class>
+ <widget class="QMainWindow" name="quickPlayblastWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>501</width>
+    <height>306</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Quick Playblast</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="aboutButton">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>-100</x>
+      <y>-100</y>
+      <width>50</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>0</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>50</width>
+      <height>50</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>About</string>
+    </property>
+    <property name="-command" stdset="0">
+     <string>aboutQuickPlayblast</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="resetButton">
+    <property name="geometry">
+     <rect>
+      <x>-200</x>
+      <y>-200</y>
+      <width>113</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reset Settings</string>
+    </property>
+    <property name="-command" stdset="0">
+     <string>resetQuickPlayblastSettings</string>
+    </property>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>481</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <property name="elideMode">
+     <enum>Qt::ElideLeft</enum>
+    </property>
+    <widget class="QWidget" name="quickPlayblast">
+     <attribute name="title">
+      <string>Quick Playblast</string>
+     </attribute>
+     <widget class="QPushButton" name="gridToggle">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>30</y>
+        <width>121</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Toggle Grid</string>
+      </property>
+      <property name="-command" stdset="0">
+       <string>playblastGridHide</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="resGateToggle">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>30</y>
+        <width>181</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Toggle Resolution Gate</string>
+      </property>
+      <property name="-command" stdset="0">
+       <string>toggleResGate</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="nurbsToggle">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>113</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Toggle Nurbs</string>
+      </property>
+      <property name="-command" stdset="0">
+       <string>playblastHideNurbs</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="VisibilityTogglesLabel">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>111</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Visibility Toggles</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="playblastBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>449</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="title">
+       <string>Playblast Options</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <widget class="QLabel" name="filenameLabel">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Filename:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="playblastName">
+       <property name="geometry">
+        <rect>
+         <x>72</x>
+         <y>30</y>
+         <width>141</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="sizeLabel">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>60</y>
+         <width>31</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Size:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="playblastSizeNum">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>60</y>
+         <width>31</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="inputMask">
+        <string>000; </string>
+       </property>
+       <property name="text">
+        <string>100</string>
+       </property>
+       <property name="maxLength">
+        <number>3</number>
+       </property>
+       <property name="cursorPosition">
+        <number>0</number>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="quickPlayblastOptions">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>60</y>
+         <width>91</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Playblast</string>
+       </property>
+       <property name="-command" stdset="0">
+        <string>quickPlayblastOptions</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="percentageLabel">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>60</y>
+         <width>16</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>%</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="fileBrowser">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>30</y>
+         <width>111</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Save Location</string>
+       </property>
+       <property name="-command" stdset="0">
+        <string>fileSaveLocation</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="allGeoToggle">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>113</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Toggle All But Geo</string>
+      </property>
+      <property name="-command" stdset="0">
+       <string>hideAllButGeo</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="changeBgColor">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>70</y>
+        <width>113</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Change BG Color</string>
+      </property>
+      <property name="-command" stdset="0">
+       <string>changeBackgroundColor</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="qpSmoothGeo">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>80</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Smooth Geometry</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="modelersPlayblast">
+     <attribute name="title">
+      <string>Modelers Playblast</string>
+     </attribute>
+     <widget class="QLabel" name="WireframePlayblastsLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>141</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Wireframe Playblasts</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="wireCheckbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>87</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Wireframe</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="wireTexCheckbox">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>40</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Wireframe Textured</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="texNoWireCheckbox">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>40</y>
+        <width>181</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Textured (No Wireframe)</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>451</width>
+        <height>151</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="title">
+       <string>Playblast Options</string>
+      </property>
+      <widget class="QLineEdit" name="modelerPlayblastName">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>30</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="modelerPlayblastSize">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>70</y>
+         <width>31</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
+       <property name="inputMask">
+        <string>000; </string>
+       </property>
+       <property name="text">
+        <string>100</string>
+       </property>
+       <property name="maxLength">
+        <number>3</number>
+       </property>
+       <property name="cursorPosition">
+        <number>0</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="FilenameLabel">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Filename:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="mp_SizeLabel">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>70</y>
+         <width>31</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Size:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="mp_PercentageLabel">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>70</y>
+         <width>21</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>%</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="modelerPlayblast">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>70</y>
+         <width>113</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Playblast</string>
+       </property>
+       <property name="-command" stdset="0">
+        <string>modelerPlayblast</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="changeWireframeColorButton">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>110</y>
+         <width>151</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Change Wireframe Color</string>
+       </property>
+       <property name="-command" stdset="0">
+        <string>wireframeColorChanger</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="toggleWireframe">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>70</y>
+         <width>151</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Toggle Wireframe</string>
+       </property>
+       <property name="-command" stdset="0">
+        <string>toggleWireframe</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="mp_FileBrowser">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>30</y>
+         <width>111</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Save Location</string>
+       </property>
+       <property name="-command" stdset="0">
+        <string>fileSaveLocation</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="doNothingForNow">
+      <property name="geometry">
+       <rect>
+        <x>-350</x>
+        <y>-20</y>
+        <width>5</width>
+        <height>5</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>PushButton</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>501</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="menuReset_Settings"/>
+    <addaction name="menuAbout"/>
+   </widget>
+   <addaction name="menuSettings"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="menuReset_Settings">
+   <property name="text">
+    <string>&amp;Reset Settings</string>
+   </property>
+  </action>
+  <action name="menuAbout">
+   <property name="text">
+    <string>&amp;About</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>menuAbout</sender>
+   <signal>triggered()</signal>
+   <receiver>aboutButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>menuReset_Settings</sender>
+   <signal>triggered()</signal>
+   <receiver>resetButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-144</x>
+     <y>-162</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>quickPlayblastOptions</sender>
+   <signal>released()</signal>
+   <receiver>quickPlayblastWindow</receiver>
+   <slot>showMinimized()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>188</x>
+     <y>243</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>250</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

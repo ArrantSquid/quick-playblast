@@ -1,0 +1,808 @@
+/*
+Quick Playblast 2.9.2 - Universal Version
+
+Concept and scripting by John P. Neumann (john@animateshmanimate.com) http:// animateshmanimate.com
+This work is licensed under the 3-clause BSD ("New BSD License") license. 
+This is one of the most permissive licenses available, next to the MIT license.
+In other words: Use it, Share it, Make it better, Give credit where it's due. Done.
+Licensing information is included in the download.
+
+What is it:
+
+I got tired of constantly having to hide everything during a playblast so I decided to write this quick script.
+
+Usage:
+
+Put this script into your scripts folder. If you're using 2010 or lower, you do not need the .ui files. If you're using 2011 and over, the .ui files are necessary.
+
+If you had a previously installed version, go to your userSetup.mel file and remove the line:
+scriptJob -e "SceneOpened" "enableQuickPlayblast();" -per;
+
+Then simply change your shelf button command from this:
+quickPlayblast;
+to this:
+source enableQuickPlayblast.mel; quickPlayblast();
+
+If this is your first time installing it put this script into your scripts folder and then put this into your shelf as a button:
+source enableQuickPlayblast.mel; quickPlayblast();
+
+Limitations:
+
+Windows and OSX only right now. Linux coming soon once I implement the sound from grevell's mel script! http:// www.creativecrash.com/maya/downloads/scripts-plugins/animation/c/linux-playblast
+
+Bugs:
+
+None known!
+
+ToDo:
+* Get Linux support working.
+			
+Please report any bugs to me on CreativeCrash! Feedback is appreciated as well, both bad and good. :) And someone flippin' rate it. Sure it's 5 stars, but that's because I think it's awesome. Duh. :)
+*/
+
+
+global proc quickPlayblast(){
+	// check what version of maya we're running
+	if (getApplicationVersionAsFloat() >= 2011){
+		//  open the QT version if we're using maya 2011 or higher
+		string $scriptsDirectory = `internalVar -usd`;
+		string $quickPlayblastWindow =`loadUI -uiFile ($scriptsDirectory+"/quick_playblast.ui")`;
+		showWindow $quickPlayblastWindow;
+		// check if we're enabled or not
+		enableQuickPlayblast();
+		// get the current files name and set it
+		playblastFileName();
+		}else{
+			if (`window -exists quickPlayblastWindow`){
+				deleteUI quickPlayblastWindow;
+			}
+			// get the os type;
+			string $os = `about -os`;
+			if($os == "mac"){
+					window 
+						-height 243 
+						-menuBar true 
+						-menuBarVisible on 
+						-minimizeButton on 
+						-maximizeButton on 
+						-sizeable on 
+						-title "Quick Playblast" 
+						-titleBar on 
+						-width 436 
+						quickPlayblastWindow;
+			}else{
+					window 
+						-height 313 
+						-menuBar true 
+						-menuBarVisible on 
+						-minimizeButton on 
+						-maximizeButton on 
+						-sizeable on 
+						-title "Quick Playblast" 
+						-titleBar on 
+						-width 503 
+						quickPlayblastWindow;	
+			}
+
+						menu -label "About" -helpMenu true;
+						menuItem -label "Reset Settings" -command resetQuickPlayblastSettings;
+						menuItem -label "About" -command aboutQuickPlayblast;
+
+						// main container for layout
+						columnLayout
+							-adjustableColumn false 
+							-rowSpacing 5
+							qpContainerColumnLayout;
+
+						//  Start tab layout section
+						tabLayout quickPlayblastTabs;
+
+						// quick playblast tab
+						frameLayout -labelVisible false -borderVisible 0 -width 439 "Quick Playblast";
+							// form layout because they're so nice
+							formLayout -numberOfDivisions 100 qpToggleForm;
+								button -height 28 -label "Toggle Nurbs" -width 100 -command "playblastHideNurbs" pbhideNurbs;
+								button -height 28 -label "Toggle Grid" -width 100 -command "playblastGridHide" pbgridHide;
+								button -height 28 -label "Toggle Resolution Gate" -width 150 -command "toggleResGate" pbtogResGate;
+								button -height 28 -label "Toggle All But Geo" -width 105 -command "hideAllButGeo" pbHideAll;
+								button -height 28 -label "Change BG Color" -width 120 -command "changeBackgroundColor" pbChangeBg;
+							formLayout -edit
+								-attachForm pbhideNurbs "top" 10
+								-attachForm pbhideNurbs "left" 10
+								-attachForm pbgridHide "top" 10
+								-attachForm pbgridHide "left" 120
+								-attachForm pbtogResGate "top" 10
+								-attachForm pbtogResGate "left" 230
+								-attachForm pbHideAll "top" 42
+								-attachForm pbHideAll "left" 50
+								-attachForm pbChangeBg "top" 42
+								-attachForm pbChangeBg "left" 170
+							qpToggleForm;
+							setParent qpToggleForm;					
+							
+							// second form layout because it's so nice
+							formLayout -numberOfDivisions 100 qpOptionsForm;
+								text -label "Filename:" -width 60  pbFilename;
+								textField -width 150 playblastName;
+								button -height 28 -label "Save Location" -width 90 -command "fileSaveLocation" qpFileSave;
+								text -label "Size:" -width 50 pbSizeField;
+								textField -width 50  -tx "100" playblastSizeNum;
+								text -label "%" pbPercent;
+								button -height 28 -label "Playblast" -width 150 -command "quickPlayblastOptions" qpOptions;
+								checkBox -label "Smooth Geometry" -width 150 qpSmoothGeo;			
+							formLayout -edit
+								-attachForm pbFilename "top" 80
+								-attachForm pbFilename "left" 0
+								-attachForm pbSizeField "top" 110
+								-attachForm pbSizeField	"left" 0
+								-attachForm playblastName "top" 80 
+								-attachForm playblastName "left" 70
+								-attachForm playblastSizeNum "top" 110
+								-attachForm playblastSizeNum "left" 70
+								-attachForm qpFileSave "top" 80
+								-attachForm qpFileSave "left" 240
+								-attachForm qpSmoothGeo "top" 45
+								-attachForm qpSmoothGeo "left" 300
+								qpOptionsForm;
+									if($os == "mac"){
+										formLayout -edit
+											-attachForm pbPercent "top" 110
+											-attachForm pbPercent "left" 120
+											-attachForm qpOptions "top" 140  
+											-attachForm qpOptions "left" 70
+										qpOptionsForm;
+									} else {
+										formLayout -edit
+											-attachForm pbPercent "top" 110
+											-attachForm pbPercent "left" 115
+											-attachForm qpOptions "top" 135  
+											-attachForm qpOptions "left" 80
+										qpOptionsForm;
+									}
+							setParent qpOptionsForm;
+					setParent quickPlayblastTabs;
+
+					// modelers playblast tab
+					frameLayout -labelVisible false -borderVisible 0 -width 439 "Modelers Playblast";
+						// first form layout because they're so nice
+						formLayout -numberOfDivisions 100 qpWireframeForm;
+							text -label "Wireframe Playblasts" wfPbText;
+							checkBox -label "Wireframe" -width 75 wireCheckbox;
+							checkBox -label "Wireframe Textured" -width 125 wireTexCheckbox;
+							checkBox -label "Textured (No Wireframe)" texNoWireCheckbox;
+						formLayout -edit
+						-attachForm wfPbText "top" 10
+						-attachForm wfPbText "left" 0
+						-attachForm wireCheckbox "top" 30
+						-attachForm wireCheckbox "left" 10
+						-attachForm wireTexCheckbox "top" 30
+						-attachForm wireTexCheckbox "left" 90
+						-attachForm texNoWireCheckbox "top" 30
+						-attachForm texNoWireCheckbox "left" 223
+						qpWireframeForm;
+						setParent qpWireframeForm;
+
+					separator;
+
+						formLayout -numberOfDivisions 100 qpModelersPBOptions;
+							text -label "Filename:" -width 60 pbModFilename;
+							button -height 28 -label "Save Location" -width 90 -command "fileSaveLocation" qpModFileSave;
+							textField -width 150 modelerPlayblastName;
+							text -label "Size:" -width 50 pbModSizeField;
+							textField -width 50 -tx "100" modelerPlayblastSize;
+							text -label "%" pbModPercent;
+							button -height 28 -label "Change Wireframe Color" -width 150 -command "wireframeColorChanger" qpWfChanger;
+							button -height 28 -label "Playblast" -width 100 -command "modelerPlayblast" qpModelerOptions;
+							button -height 28 -label "Toggle Wireframe" -width 110 -command "toggleWireframe" toggleWireframeBttn;
+						formLayout -edit
+							-attachForm pbModFilename "top" 60
+							-attachForm pbModFilename "left" 0
+							-attachForm pbModSizeField "top" 90
+							-attachForm pbModSizeField "left" 0
+							-attachForm modelerPlayblastName "top" 60 
+							-attachForm modelerPlayblastName "left" 70			
+							-attachForm modelerPlayblastSize "top" 90
+							-attachForm modelerPlayblastSize "left" 70
+							-attachForm toggleWireframeBttn "top" 95 // 60
+							-attachForm toggleWireframeBttn "left" 150 // 270
+							-attachForm qpWfChanger "top" 95 // 95
+							-attachForm qpWfChanger "left" 280 // 270
+							-attachForm qpModFileSave "top" 60 // 95
+							-attachForm qpModFileSave "left" 240 // 150
+						qpModelersPBOptions;
+						if($os == "mac"){
+							formLayout -edit
+								-attachForm pbModPercent "top" 90
+								-attachForm pbModPercent "left" 120
+								-attachForm qpModelerOptions "top" 140
+								-attachForm qpModelerOptions "left" 80
+							qpModelersPBOptions;
+						}else{
+							formLayout -edit
+								-attachForm pbModPercent "top" 90
+								-attachForm pbModPercent "left" 110
+								-attachForm qpModelerOptions "top" 95  
+								-attachForm qpModelerOptions "left" 130
+							qpModelersPBOptions;
+						}
+						setParent qpModelersPBOptions;
+					setParent quickPlayblastTabs;
+			setParent qpContainerColumnLayout;
+
+				// show it
+				showWindow;
+				// check if we're enabled or not
+				enableQuickPlayblast();
+				// get the scene name and put it in the playblast fields
+				playblastFileName();
+	}
+}
+
+// check if we've enabled the variables or not
+global proc enableQuickPlayblast(){
+	// check if variables are already set from a previous session
+	int $resGateOption = `optionVar -exists "resolutionGate"`;
+	int $allHiddenOption = `optionVar -exists "everythingIsHidden"`;
+	int $pbSaveLocation = `optionVar -exists "playblastSaveLocation"`;
+	// initialize them if they aren't
+	if ($resGateOption != 1){
+		optionVar -iv "resolutionGate" 0;
+	}
+	if ($allHiddenOption != 1){
+		optionVar -iv "everythingIsHidden" 0;
+	}
+	if ($pbSaveLocation != 1){
+		string $saveLocation = `workspace -q -fn`;
+		optionVar -sv "playblastSaveLocation" $saveLocation;
+	}
+}
+
+// make a file browser dialog and save the location from that dialog
+global proc fileSaveLocation(){
+	//  get the location from what was set in the playblastSaveLocation
+	
+	// change this back once we go live!
+	string $currentLocation = `optionVar -q playblastSaveLocation`;
+	
+	// string $currentLocation = `workspace -q -fn`;
+	
+	// set the current directory to the location we specified in the last playblastSaveLocation
+	workspace -dir $currentLocation;
+	// check version since Autodesk deprecated fileBrowserDialog in 2011
+	if (getApplicationVersionAsFloat() >= 2011){
+		// give the user a folder selection dialog
+		string $result[] = `fileDialog2 -ds 1 -fm 0 -dir $currentLocation`;
+		// set the save location temporarily
+		optionVar -sv "playblastSaveLocation" $result;
+		// retrieve the filename and strip what we need from it
+		string $filename = `optionVar -q playblastSaveLocation`;
+		// get the extension if there is one
+		string $extension = fileExtension($filename);
+		if($extension != ""){
+			// extract the path name
+			string $pathName = `match "^.*/" $filename`;
+			// extract the file name
+			string $newName = `match "[^/\\]*$" $filename`;
+			// strip the file extension from it since it's set dynamically
+			string $newFilename = `match "^[^\.]*" $newName`;
+			// set the full path for readability within the quickplayblast window
+			string $fullPath = $pathName + $newFilename;
+			// set the real path now
+			optionVar -sv "playblastSaveLocation" $pathName;
+			// set the save location to update the filename
+			textField -e -text $fullPath playblastName;
+			textField -e -text $fullPath modelerPlayblastName;
+		} else {
+			// set the save location
+			optionVar -sv "playblastSaveLocation" $filename;
+			// set the location to update the filename
+			textField -e -text $filename playblastName;
+			textField -e -text $filename modelerPlayblastName;	
+		}
+	}else{
+		// give the user a folder selection dialog
+		// string $result = `fileBrowserDialog -m 1 -an "Choose where to save your playblast to..." -fc ("fileBrowserCallback \"" + $currentLocation + "\"")`;
+		string $filename = `fileBrowserDialog -m 1 -an "Choose where to save your playblast to..." -fc ("fileBrowserCallback") -ds 1`;
+	}
+}
+
+// file browser callback for maya 2010 and below
+global proc fileBrowserCallback(string $filename, string $type){
+	
+	// get the extension if there is one
+	string $extension = fileExtension($filename);
+	if($extension != ""){
+		print "extension found \n";
+		// extract the path name
+		string $pathName = `match "^.*/" $filename`;
+		// extract the file name
+		string $newName = `match "[^/\\]*$" $filename`;
+		// strip the file extension from it since it's set dynamically
+		string $newFilename = `match "^[^\.]*" $newName`;
+		// set the full path for readability within the quickplayblast window
+		string $fullPath = $pathName + $newFilename;
+		// set the real path now
+		optionVar -sv "playblastSaveLocation" $pathName;
+		// set the save location to update the filename
+		textField -e -text $fullPath playblastName;
+		textField -e -text $fullPath modelerPlayblastName;
+	} else {
+		print "No extension \n";
+		// extract the path name
+		string $pathName = `match "^.*/" $filename`;
+		// extract the file name
+		string $newName = `match "[^/\\]*$" $filename`;
+		// strip the file extension from it since it's set dynamically
+		string $newFilename = `match "^[^\.]*" $newName`;
+		// set the full path for readability within the quickplayblast window
+		string $fullPath = $pathName + $newFilename;
+		// set the save location
+		optionVar -sv "playblastSaveLocation" $pathName;
+		// set the location to update the filename
+		textField -e -text $fullPath playblastName;
+		textField -e -text $fullPath modelerPlayblastName;	
+	}	
+}
+
+// get the scene name and use it for the playblast name
+global proc playblastFileName(){
+	string $filename = `file -q -sn`;
+	if ($filename != ""){
+		string $tokens[];
+		tokenize($filename,"/",$tokens);
+		$filename = $tokens[size($tokens)-1];
+		// take out the file extension
+		clear $tokens;
+		tokenize($filename,".",$tokens);
+		$filename = $tokens[0];
+	} else {
+		// use playblast as the name if no name is specified
+		$filename = "playblast";
+	}
+	// now set the filename in the ui
+	textField -e -text $filename playblastName;
+	textField -e -text $filename modelerPlayblastName;	
+}
+
+// show only geometry
+global proc hideAllButGeo(){	
+	// get the current camera					
+	string $currentCam;
+	//  this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	
+	// query the variable to see if everything is hidden or not
+	int $isEverythingHidden = `optionVar -q "everythingIsHidden"`;
+	// if it's hidden let's show everything
+	if($isEverythingHidden != 0){
+		// set the variable to 0 so next time we'll hide it
+		optionVar -iv "everythingIsHidden" 0;
+		// show everything
+		modelEditor -e -allObjects true $currentCam;
+	}else{
+		// set the variable to 1 so next time we'll show it
+		optionVar -iv "everythingIsHidden" 1;
+		// hide everything
+		modelEditor -e -allObjects false $currentCam;
+		// show polymeshes
+		modelEditor -e -polymeshes true $currentCam;
+		// show nurbssurfaces
+		modelEditor -e -nurbsSurfaces true $currentCam;
+	}
+}
+
+// hide the nurbs
+global proc playblastHideNurbs(){
+	// get the current camera					
+	string $currentCam;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	// query nurbs and see if they're hidden
+	int $areNurbsHidden = `modelEditor -q -nurbsCurves $currentCam`;
+	// if it's hidden let's show it
+	if($areNurbsHidden != 0){
+		// hide the nurbs
+		modelEditor -e -nurbsCurves false $currentCam;
+	}else{
+		// show the nurbs
+		modelEditor -e -nurbsCurves true $currentCam;
+	}
+}
+
+// toggle to hide the grid or not
+global proc playblastGridHide(){
+	// get the current camera					
+	string $currentCam;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	// check to see if the grid is hidden or not
+	int $isGridHidden = `modelEditor -q -grid $currentCam`;
+	// if it's hidden let's show it
+	if ($isGridHidden != 0){
+		// turn the grid off
+		modelEditor -e -grid false $currentCam;
+	}else{
+		// turn the grid on
+		modelEditor -e -grid true $currentCam;
+	}
+}
+
+// toggle the resolution gate
+global proc toggleResGate(){
+	// get the current camera					
+	string $currentPanel;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentPanel = `getPanel -withFocus`;
+	}else{
+		$currentPanel = `playblast -ae`;
+	}
+	// get the current camera from the modelPanel
+	string $currentCam = `modelPanel -q -cam $currentPanel`;
+	// query the resolution gate and see if it's hidden
+	int $isResGateOn = `optionVar -q "resolutionGate"`;	
+	// if it's hidden let's show it
+	if ($isResGateOn != 0){
+		// set the variable to 0 so next time we'll hide it
+		optionVar -iv "resolutionGate" 0;
+		// turn the res gate on
+		camera -e -dfg off -dr on -ovr 1.3 $currentCam;
+	}else{
+		// set the variable to 1 so next time we'll show it
+		optionVar -iv "resolutionGate" 1;
+		// turn the res gate off
+		camera -e -dfg off -dr off -ovr 1.0 $currentCam;
+	}
+}
+
+
+// wireframe on shaded
+global proc toggleWireFrame(){
+	// get the current camera					
+	string $currentCam;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	// make sure that smooth shaded is on
+	modelEditor -edit -displayAppearance smoothShaded -activeOnly false $currentCam;
+	// turn wireframe on shaded on
+	setWireframeOnShadedOption true $currentCam;
+	// make it a smooth wireframe :)
+	modelEditor -e -smoothWireframe true $currentCam;
+	// turn off the textured version
+	modelEditor -e -displayTextures false $currentCam;
+}
+
+// textured version
+global proc texturedModelNoWire(){
+	// get the current camera					
+	string $currentCam;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	// make sure that smooth shaded is on
+	modelEditor -edit -displayAppearance smoothShaded -activeOnly false $currentCam;
+	// display the textured version
+	modelEditor -e -displayTextures true $currentCam;
+	// turn wireframe on shaded off
+	setWireframeOnShadedOption false $currentCam;
+	// turn off smooth wireframe
+	modelEditor -e -smoothWireframe false $currentCam;
+}
+
+// textured with wireframe
+global proc texturedWireframe(){
+	// get the current camera					
+	string $currentCam;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	// make sure that smooth shaded is on
+	modelEditor -edit -displayAppearance smoothShaded -activeOnly false $currentCam;
+	// display the textured version
+	modelEditor -e -displayTextures true $currentCam;
+	// turn wireframe on shaded on
+	setWireframeOnShadedOption true $currentCam;
+	// make it a smooth wireframe :)
+	modelEditor -e -smoothWireframe true $currentCam;
+}
+
+// change the wireframe color
+global proc wireframeColorChanger(){
+	string $listObjects[] = `ls -type mesh`;
+	for($item in $listObjects){
+		select -add $item;
+	}
+	objectColorPalette;
+}
+
+global proc toggleWireframe(){
+	// get the current camera					
+	string $currentCam;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	// determine if wireframe is on or off
+	int $wireFrameOn = `modelEditor -q -wos $currentCam`;
+	if($wireFrameOn != 0){
+		// turn wireframe on shaded off	
+		setWireframeOnShadedOption false $currentCam;
+		// turn the smoothing off as well
+		modelEditor -e -smoothWireframe false $currentCam;
+	}else{
+		// turn wireframe on shaded on	
+		setWireframeOnShadedOption true $currentCam;
+		// turn the smoothing back on
+		modelEditor -e -smoothWireframe true $currentCam;
+	}
+}
+
+global proc changeBackgroundColor(){
+	cycleBackgroundColor;
+}
+
+// created to just do the playblast
+global proc playblastMe(string $pbFileName, string $compression, string $pbSize){
+	// move the window offscreen if we're using 2010 or lower
+	float $winLocation;
+	if (getApplicationVersionAsFloat() <= 2010){
+		// get the current window location
+		$winLocation = `window -q -te quickPlayblastWindow`;
+	
+		// move the window to a negative location so it doesn't show up in renders
+		window -e -te -2000 quickPlayblastWindow;
+	}
+	// get the size
+	string $modelerPlayblastSizeString = `textField -q -text modelerPlayblastSize`;
+	// recast it as an integer
+	int $modelerPlayblastSize = $modelerPlayblastSizeString;
+	
+	// get the sound file if there is one
+	global string $gPlayBackSlider;
+	string $soundFile = `timeControl -q -s $gPlayBackSlider`;	
+	// get the resolution height and width
+	int $resolutionWidth = `getAttr defaultResolution.width`;
+	int $resolutionHeight = `getAttr defaultResolution.height`;
+	
+	// have to check for application version since maya 2010 doesn't accept the quality flag
+	if (getApplicationVersionAsFloat() >= 2011){
+		// finally output the playblast with the given options
+		playblast -p $modelerPlayblastSize -f $pbFileName -fo -fmt "movie" -orn 0 -cc 1 -v 1 -qlt 100 -s $soundFile -c $compression -width $resolutionWidth -height $resolutionHeight;
+	}else{
+		// finally output the playblast with the given options
+		playblast -p $modelerPlayblastSize -f $pbFileName -fo -fmt "movie" -orn 0 -cc 1 -v 1 -s $soundFile -c $compression -width $resolutionWidth -height $resolutionHeight;
+	}
+	
+	// print some output if you don't have a sound file
+	if ($soundFile == ""){
+		print "You either have no sound file or didn't have one loaded in your timeline. Your file was playblasted all the same. \n";
+	}
+	// move the window back in place if we're using 2010 or lower
+	if (getApplicationVersionAsFloat() <= 2010){
+		// move the window back to its previous location
+		window -e -te $winLocation quickPlayblastWindow;
+	}
+}
+
+// modeler playblast
+global proc modelerPlayblast(){	
+	// check to see which checkboxes are enabled
+	int $textureNoWireRender = `checkBox -q -v texNoWireCheckbox`;
+	int $wireTexturedRender = `checkBox -q -v wireTexCheckbox`;
+	int $wireRender = `checkBox -q -v wireCheckbox`;	
+	
+	// get the file name
+	string $modelerPlayblastFileName = `textField -q -text modelerPlayblastName`;
+	
+	// get the size
+	string $modelerPlayblastSizeString = `textField -q -text modelerPlayblastSize`;
+	// recast it as an integer
+	int $modelerPlayblastSize = $modelerPlayblastSizeString;
+	
+	// now go through and playblast each type requested
+	if($wireRender == 0 && $textureNoWireRender == 0 && $wireTexturedRender == 0){
+		print "You didn't select any options! Use the regular version for that! \n";
+	}
+	if ($wireRender == 1){
+		// run the wireframe script
+		toggleWireFrame;	
+		// rename the file so we know which render is which
+		string $modelerPlayblastFullName = ($modelerPlayblastFileName + "_wireframe");
+		// set the compression type
+		string $compression = "none";
+		// call the playblast procedure
+		playblastMe($modelerPlayblastFullName, $compression, $modelerPlayblastSize);
+		print "Wireframe has been playblasted \n";
+	}
+	if ($textureNoWireRender == 1){
+		// run the textured version
+		texturedModelNoWire;		
+		// rename the file so we know which render is which
+		string $modelerPlayblastFullName = ($modelerPlayblastFileName + "_texturedNoWire");
+		// set the compression type
+		string $compression = "none";
+		// call the playblast procedure
+		playblastMe($modelerPlayblastFullName, $compression, $modelerPlayblastSize);
+		print "Textured version with no wireframe has been playblasted \n";
+	}
+	if ($wireTexturedRender == 1){
+		// run the textured with wireframe version
+		texturedWireframe;
+		// rename the file so we know which render is which
+		string $modelerPlayblastFullName = ($modelerPlayblastFileName + "_texturedWire");
+		// set the compression type
+		string $compression = "none";
+		// call the playblast procedure
+		playblastMe($modelerPlayblastFullName, $compression, $modelerPlayblastSize);
+		print "Textured version with wireframe has been playblasted \n";
+	}
+	
+}
+
+
+// playblast options
+global proc quickPlayblastOptions(){
+	// get the value from the smooth geo checkbox
+	int $smoothGeometry = `checkBox -q -v qpSmoothGeo`;
+	if($smoothGeometry == 1){
+		// select all geometry in the scene
+		select `ls -type "mesh"`;
+		// Set the display to high quality settings
+		HighQualityDisplay;
+		setDisplaySmoothness 3;
+		displaySmoothness -divisionsU 3 -divisionsV 3 -pointsWire 16 -pointsShaded 4 -polygonObject 3;
+		subdivDisplaySmoothness -smoothness 3;
+		// clear the selection(s)
+		select -cl;
+	}
+	
+	// get the file name
+	string $playblastFileName = `textField -q -text playblastName`;
+	// get the playblast size
+	string $playblastSizeString = `textField -q -text playblastSizeNum`;
+	// recast it as an integer
+	int $playblastSize = $playblastSizeString;
+	
+	// this sets the compression to none like in the modelers playblast
+	// a better option is coming soon
+	// set the compression type
+	string $compression = "none";
+	// call the playblast procedure
+	playblastMe($playblastFileName, $compression, $playblastSize);
+	
+	// reset the smoothness to 1 if the checkbox was checked earlier
+	if($smoothGeometry == 1){
+		// select all the geometry
+		select `ls -type "mesh"`;
+		// Set the display to low quality settings
+		LowQualityDisplay;
+		setDisplaySmoothness 1;
+		displaySmoothness -divisionsU 0 -divisionsV 0 -pointsWire 4 -pointsShaded 1 -polygonObject 1;
+		subdivDisplaySmoothness -smoothness 1;
+		// clear the selection(s)
+		select -cl;
+	}
+
+	// fake maya output
+	string $outputFileDirectory = "//  Result: " + `workspace -q -fullName` + "/" + $playblastFileName + "\n";
+	print $outputFileDirectory;
+}
+
+
+global proc aboutQuickPlayblast(){
+	string $scriptsDirectory = `internalVar -usd`;
+	string $aboutQuickPlayblastWindow =`loadUI -uiFile ($scriptsDirectory+"/aboutQuickPlayblast.ui")`;
+	showWindow $aboutQuickPlayblastWindow;	
+}
+
+
+
+global proc resetQuickPlayblastSettings(){
+	// hide the gate
+	// get the current panel					
+	string $currentPanel;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentPanel = `getPanel -withFocus`;
+	}else{
+		$currentPanel = `playblast -ae`;
+	}
+	// get the current camera from the modelPanel
+	string $currentCam = `modelPanel -q -cam $currentPanel`;
+	// query the resolution gate and see if it's hidden
+	int $isResGateOn = `optionVar -q "resolutionGate"`;
+	// if the gate is shown we want to hide it
+	if ($isResGateOn != 1){
+		// set the variable to 1 so next time we'll show it
+		optionVar -iv "resolutionGate" 1;
+		// turn the res gate off
+		camera -e -dfg off -dr off -ovr 1.0 $currentCam;
+	}
+		
+	// show the grid
+	
+	// get the current camera					
+	string $currentCam;
+	// this fixes a bug with maya versions 2008 and lower
+	if (getApplicationVersionAsFloat() <= 2008){
+		$currentCam = `getPanel -withFocus`;
+	}else{
+		$currentCam = `playblast -ae`;
+	}
+	// check to see if the grid is hidden or not
+	int $isGridHidden = `modelEditor -q -grid $currentCam`;
+	// if it's hidden let's show it
+	if ($isGridHidden != 1){
+		// turn the grid on
+		modelEditor -e -grid true $currentCam;
+	}
+
+	// show the nurbs
+	
+	// query nurbs and see if they're hidden
+	int $areNurbsHidden = `modelEditor -q -nurbsCurves $currentCam`;
+	// if it's hidden let's show it
+	if($areNurbsHidden != 1){
+		// show the nurbs
+		modelEditor -e -nurbsCurves true $currentCam;	
+	}
+	
+	// turning off wireframes
+	
+	// determine if wireframe is on or off
+	int $wireFrameOn = `modelEditor -q -wos $currentCam`;
+	if($wireFrameOn != 0){
+		// turn wireframe on shaded off	
+		setWireframeOnShadedOption false $currentCam;
+		// turn the smoothing off as well
+		modelEditor -e -smoothWireframe false $currentCam;
+	}
+	
+	// set the text fields to defaults
+	playblastFileName();
+	
+	// set the save location to the current working directory
+	string $saveLocation = `workspace -q -fn`;
+	optionVar -sv "playblastSaveLocation" $saveLocation;
+	
+	// reset the playblast size
+	textField -e -text 100 playblastSizeNum;
+	textField -e -text 100 modelerPlayblastSize;
+	
+	// clear the checkboxes
+	checkBox -e -v 0 wireCheckbox;
+	checkBox -e -v 0 wireTexCheckbox;
+	checkBox -e -v 0 texNoWireCheckbox;
+	
+	// clear the textScrollList
+	textScrollList -e -deselectAll qpGeoScrollList;
+	
+	// let the user know everythings been reset
+	print "All settings have been reset.\n Playblast location is now your current projects base directory.\n";
+}
+
+// end of code
