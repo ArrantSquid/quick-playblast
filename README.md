@@ -63,13 +63,14 @@ This script used to run as a script job when I first made it. I was experimentin
 
 The userSetup.mel file is in the same location you should put the script in.
 
-    On Windows:
-        Windows Vista and higher: C:\Users\username\Documents\maya\versionOfMaya\scripts (you may have My Documents instead of Documents if you upgraded from XP or just ported your stuff over, but it's the same directory)
-        Windows XP and lower: C:\Documents and Settings\username\My Documents\maya\versionOfMaya\scripts
+On Windows:
+    Windows Vista and higher: C:\Users\username\Documents\maya\versionOfMaya\scripts (you may have My Documents instead of Documents if you upgraded from XP or just ported your stuff over, but it's the same directory)
+    Windows XP and lower: C:\Documents and Settings\username\My Documents\maya\versionOfMaya\scripts
 
-    You can access this path via your My Documents folder rather than going through the whole hierarchy, but I put it there for completeness.
+You can access this path via your My Documents folder rather than going through the whole hierarchy, but I put it there for completeness.
 
-    On OSX: /Users/username/Library/Preferences/Autodesk/maya/versionOfMaya/scripts
+On OSX:
+    /Users/username/Library/Preferences/Autodesk/maya/versionOfMaya/scripts
 
 
 ### Why do/don't I need the .ui files?
